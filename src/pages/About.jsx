@@ -223,7 +223,7 @@ function About() {
               transition={{ duration: 0.6 }}
             >
               <h2 className="text-3xl font-bold mb-4">
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">Meet Man Behind RapidUIX</span>
+                <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-500">Meet Team Behind RapidUIX</span>
               </h2>
             
             </motion.div>
