@@ -11,7 +11,7 @@ function ComponentsList({ components, onSelect }) {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {components.map((component, index) => (
         <motion.div
-          key={component.id}
+          key={component.id || index}
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: index * 0.1 }}
@@ -22,17 +22,14 @@ function ComponentsList({ components, onSelect }) {
             <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-purple-500 opacity-0 group-hover:opacity-100 transition-opacity" />
             
             <h3 className="text-xl font-semibold mb-2">
-              {component.title}
+              {component.title || component.name}
             </h3>
             <p className="text-muted-foreground text-sm mb-4">
               {component.description}
             </p>
             <div className="flex items-center gap-2">
               <span className="px-2 py-1 text-xs font-medium bg-primary/10 text-primary rounded">
-                {component.framework}
-              </span>
-              <span className="px-2 py-1 text-xs font-medium bg-muted text-muted-foreground rounded">
-                {component.category}
+                {component.framework || 'React Native'}
               </span>
             </div>
           </div>
@@ -45,7 +42,6 @@ function ComponentsList({ components, onSelect }) {
 function Components() {
   const [searchTerm, setSearchTerm] = useState('');
   const [components, setComponents] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const location = useLocation();
@@ -56,28 +52,6 @@ function Components() {
       try {
         const componentsList = await fetchComponentList();
         setComponents(componentsList);
-        
-        // Group components by category
-        const groupedComponents = componentsList.reduce((acc, component) => {
-          const category = component.category || 'Uncategorized';
-          if (!acc[category]) {
-            acc[category] = [];
-          }
-          acc[category].push(component);
-          return acc;
-        }, {});
-
-        // Transform into sidebar structure
-        const sidebarCategories = Object.entries(groupedComponents).map(([name, components]) => ({
-          name,
-          slug: name.toLowerCase().replace(/\s+/g, '-'),
-          components: components.map(c => ({
-            ...c,
-            slug: c.title.toLowerCase().replace(/\s+/g, '-')
-          }))
-        }));
-
-        setCategories(sidebarCategories);
         setLoading(false);
       } catch (err) {
         setError('Failed to load components. Please try again later.');
@@ -90,13 +64,8 @@ function Components() {
   }, []);
 
   const handleComponentSelect = (component) => {
-    const category = categories.find(cat => 
-      cat.components.some(c => c.id === component.id)
-    );
-    if (category) {
-      const componentSlug = component.title.toLowerCase().replace(/\s+/g, '-');
-      navigate(`/components/${category.slug}/${componentSlug}`);
-    }
+    const componentSlug = (component.title || component.name).toLowerCase().replace(/\s+/g, '-');
+    navigate(`/components/${componentSlug}`);
   };
 
   if (loading) {
@@ -116,15 +85,15 @@ function Components() {
   }
 
   const filteredComponents = components.filter(component =>
-    component.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    component.description.toLowerCase().includes(searchTerm.toLowerCase())
+    (component?.title || component?.name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (component?.description || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const isComponentView = location.pathname !== '/components';
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar categories={categories} />
+      <Sidebar components={components} />
       
       <div className="flex-1 ml-64">
         <div className="max-w-6xl mx-auto px-8 py-8">
@@ -169,7 +138,7 @@ function Components() {
 
           <Routes>
             <Route 
-              path=":category/:component" 
+              path=":component" 
               element={<ComponentView components={components} />} 
             />
           </Routes>

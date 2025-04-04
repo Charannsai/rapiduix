@@ -5,7 +5,7 @@ import * as Tabs from '@radix-ui/react-tabs';
 import * as Select from '@radix-ui/react-select';
 import { FiCopy, FiCheck, FiChevronDown } from 'react-icons/fi';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
-import { fetchComponentCode } from '../utils/github';
+import { fetchComponentCode, fetchComponentDocs } from '../utils/github';
 import PreviewRenderer from './PreviewRenderer';
 import Prism from 'prismjs';
 import 'prismjs/themes/prism-tomorrow.css';
@@ -14,13 +14,14 @@ import 'prismjs/components/prism-typescript';
 import 'prismjs/components/prism-dart';
 
 function ComponentView({ components }) {
-  const { category, component: componentSlug } = useParams();
+  const { component: componentSlug } = useParams();
   const [activeComponent, setActiveComponent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [copied, setCopied] = useState(false);
   const [selectedFramework, setSelectedFramework] = useState('react-native');
   const [componentCode, setComponentCode] = useState('');
+  const [componentDocs, setComponentDocs] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
 
   useEffect(() => {
@@ -28,13 +29,20 @@ function ComponentView({ components }) {
       setLoading(true);
       try {
         const component = components.find(c => 
-          c.title.toLowerCase().replace(/\s+/g, '-') === componentSlug
+          (c.title || c.name).toLowerCase().replace(/\s+/g, '-') === componentSlug
         );
         
         if (component) {
-          const code = await fetchComponentCode(component.id, selectedFramework);
+          const [code, docs] = await Promise.all([
+            fetchComponentCode(component.name, selectedFramework),
+            fetchComponentDocs(component.name, selectedFramework)
+          ]);
+          
           setComponentCode(code);
-          setActiveComponent({ ...component });
+          setComponentDocs(docs);
+          setActiveComponent(component);
+        } else {
+          setError('Component not found');
         }
       } catch (err) {
         console.error('Error loading component:', err);
@@ -44,14 +52,16 @@ function ComponentView({ components }) {
       }
     };
 
-    loadComponent();
-  }, [componentSlug, components]);
+    if (componentSlug && components.length > 0) {
+      loadComponent();
+    }
+  }, [componentSlug, components, selectedFramework]);
 
   const handleFrameworkChange = async (framework) => {
     setCodeLoading(true);
     try {
       if (activeComponent) {
-        const code = await fetchComponentCode(activeComponent.id, framework);
+        const code = await fetchComponentCode(activeComponent.name, framework);
         setComponentCode(code);
         setSelectedFramework(framework);
       }
@@ -100,37 +110,6 @@ function ComponentView({ components }) {
       transition={{ duration: 0.6 }}
       className="relative"
     >
-      {/* Background Animation */}
-      <div className="absolute inset-0 -z-10 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 right-1/4 w-96 h-96 rounded-full bg-cyan-500/5 blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, -50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        
-        <motion.div
-          className="absolute bottom-1/4 left-1/4 w-[30rem] h-[30rem] rounded-full bg-purple-500/5 blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
-
       <div className="p-6 border-b border-border">
         <motion.h1 
           initial={{ opacity: 0, x: -20 }}
@@ -138,16 +117,15 @@ function ComponentView({ components }) {
           transition={{ duration: 0.6, delay: 0.2 }}
           className="text-2xl font-bold text-gradient"
         >
-          {activeComponent.title}
+          {activeComponent.title || activeComponent.name}
         </motion.h1>
-        <motion.p 
+        <motion.div 
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6, delay: 0.3 }}
-          className="text-muted-foreground mt-2"
-        >
-          {activeComponent.description}
-        </motion.p>
+          className="prose prose-invert max-w-none mt-4"
+          dangerouslySetInnerHTML={{ __html: componentDocs }}
+        />
       </div>
 
       <Tabs.Root defaultValue="preview" className="p-6">
@@ -169,7 +147,7 @@ function ComponentView({ components }) {
         </div>
 
         <Tabs.Content value="preview" className="rounded-lg overflow-hidden">
-          <PreviewRenderer component={activeComponent} />
+          <PreviewRenderer code={componentCode} />
         </Tabs.Content>
 
         <Tabs.Content value="code" className="rounded-lg">

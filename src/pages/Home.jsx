@@ -2,7 +2,7 @@ import FuturisticBackground from '../components/FuturisticBackground';
 import HeroSection from '../components/HeroSection';
 import MobileShowcase from '../components/MobileShowcase';
 import FeaturesSection from '../components/FeaturesSection';
-import ComponentsShowcase from '../components/ComponentsShowcase';
+// import ComponentsShowcase from '../components/ComponentsShowcase';
 import HowItWorks from '../components/HowItWorks';
 import TestimonialsSection from '../components/TestimonialsSection';
 import CTASection from '../components/CTASection';
@@ -15,7 +15,7 @@ function Home() {
       <HeroSection />
       <MobileShowcase />
       <FeaturesSection />
-      <ComponentsShowcase />
+      {/* <ComponentsShowcase /> */}
       <HowItWorks />
       <TestimonialsSection />
       <CTASection />

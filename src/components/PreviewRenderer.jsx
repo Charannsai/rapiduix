@@ -1,67 +1,35 @@
-import React from 'react';
-import { motion } from 'framer-motion';
+import React from "react";
+import { motion } from "framer-motion";
 
-function PreviewRenderer({ component }) {
+function PreviewRenderer({ code }) {
   const [loading, setLoading] = React.useState(true);
-  
+
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(false);
     }, 1500);
     return () => clearTimeout(timer);
   }, []);
-  
-  if (!component?.preview_link) {
-    return (
-      <div className="flex items-center justify-center h-[600px] bg-background/50 rounded-lg">
-        <p className="text-red-400">Preview not available</p>
-      </div>
-    );
-  }
-  
+
   return (
     <div className="relative min-h-[600px] flex items-center justify-center">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute top-1/4 left-1/4 w-64 h-64 rounded-full bg-cyan-500/5 blur-3xl"
-          animate={{
-            scale: [1, 1.2, 1],
-            x: [0, 50, 0],
-            y: [0, -30, 0],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        
-        <motion.div
-          className="absolute bottom-1/4 right-1/4 w-80 h-80 rounded-full bg-purple-500/5 blur-3xl"
-          animate={{
-            scale: [1, 1.3, 1],
-            x: [0, -50, 0],
-            y: [0, 30, 0],
-          }}
-          transition={{
-            duration: 18,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
-      
-      <div className="relative w-[275px] h-[612px]">
-        {/* Phone frame */}
-        <div className="absolute inset-0 bg-gray-900 rounded-[3rem] shadow-2xl" />
-        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[120px] h-[30px] bg-gray-900 rounded-b-3xl" />
-        
-        {/* Phone screen */}
-        <div className="absolute inset-[10px] rounded-[2.5rem] overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900">
+      {/* Card container */}
+      <div className="relative w-full max-w-2xl rounded-xl overflow-hidden bg-white shadow-xl border border-gray-200">
+        {/* Header */}
+        <div className="bg-gray-100 p-4 border-b border-gray-200 flex items-center justify-between">
+          <div className="flex space-x-2">
+            <div className="w-3 h-3 rounded-full bg-red-500"></div>
+            <div className="w-3 h-3 rounded-full bg-yellow-500"></div>
+            <div className="w-3 h-3 rounded-full bg-green-500"></div>
+          </div>
+          <div className="text-sm font-medium text-gray-600">Preview</div>
+        </div>
+
+        {/* Content */}
+        <div className="relative h-[500px] bg-white">
           {loading ? (
             <div className="absolute inset-0 flex items-center justify-center bg-background">
-              <motion.div 
+              <motion.div
                 className="relative w-12 h-12"
                 animate={{ rotate: 360 }}
                 transition={{ duration: 2, repeat: Infinity, ease: "linear" }}
@@ -71,41 +39,39 @@ function PreviewRenderer({ component }) {
               </motion.div>
             </div>
           ) : (
-            <div className="w-full h-full overflow-hidden">
-              <div className="w-full h-full relative">
-                <iframe
-                  src={component.preview_link}
-                  className="w-full h-full border-0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  style={{
-                    clipPath: 'inset(0 0 0 60%)', /* Hide the left half (code editor) */
+            <div className="relative w-full h-full">
+              <iframe
+                src={`https://snack.expo.dev/?platform=web&data-snack-preview=true&code=${encodeURIComponent(code)}`}
+                className="absolute top-0 left-0 w-full h-full border-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                sandbox="allow-scripts allow-same-origin allow-modals allow-forms"
+                 style={{
+                    clipPath: 'inset(11% 0 40% 80.5%)', 
                     position: 'absolute',
-                    top: -40,
-                    left: '-195%', /* Position iframe to show only the right half */
-                    width: '300%', /* Double the width to maintain proper scaling */
-                    height: '100%',
+                    top: -100,
+                    bottom: -200,
+                    left: '-220%', 
+                    right:'80%',
+                    width: '300%', 
+                    height: '200%',
                     transformOrigin: 'center right'
                   }}
-                />
-              </div>
+              />
             </div>
           )}
         </div>
-        
-        {/* Phone reflections */}
-        <div className="absolute inset-0 rounded-[3rem] bg-gradient-to-tr from-white/5 to-transparent pointer-events-none" />
-        
-        {/* Animated glow */}
-        <motion.div 
-          className="absolute -inset-4 bg-gradient-to-r from-cyan-500/20 via-blue-500/20 to-purple-500/20 rounded-[4rem] blur-xl -z-10"
+
+        {/* Animated accent border */}
+        <motion.div
+          className="absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500"
           animate={{
-            opacity: [0.5, 0.8, 0.5],
+            opacity: [0.7, 1, 0.7],
           }}
           transition={{
             duration: 3,
             repeat: Infinity,
-            ease: "easeInOut"
+            ease: "easeInOut",
           }}
         />
       </div>
