@@ -21,6 +21,7 @@ function ComponentView({ components }) {
   const [copied, setCopied] = useState(false);
   const [selectedFramework, setSelectedFramework] = useState('react-native');
   const [componentCode, setComponentCode] = useState('');
+  const [reactNativeCode, setReactNativeCode] = useState('');
   const [componentDocs, setComponentDocs] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
 
@@ -33,12 +34,14 @@ function ComponentView({ components }) {
         );
         
         if (component) {
-          const [code, docs] = await Promise.all([
-            fetchComponentCode(component.name, selectedFramework),
+          // Always fetch React Native code for preview
+          const [rnCode, docs] = await Promise.all([
+            fetchComponentCode(component.name, 'react-native'),
             fetchComponentDocs(component.name, selectedFramework)
           ]);
           
-          setComponentCode(code);
+          setReactNativeCode(rnCode);
+          setComponentCode(rnCode);
           setComponentDocs(docs);
           setActiveComponent(component);
         } else {
@@ -55,14 +58,18 @@ function ComponentView({ components }) {
     if (componentSlug && components.length > 0) {
       loadComponent();
     }
-  }, [componentSlug, components, selectedFramework]);
+  }, [componentSlug, components]);
 
   const handleFrameworkChange = async (framework) => {
     setCodeLoading(true);
     try {
       if (activeComponent) {
-        const code = await fetchComponentCode(activeComponent.name, framework);
-        setComponentCode(code);
+        if (framework === 'react-native') {
+          setComponentCode(reactNativeCode);
+        } else {
+          const code = await fetchComponentCode(activeComponent.name, framework);
+          setComponentCode(code);
+        }
         setSelectedFramework(framework);
       }
     } catch (err) {
@@ -147,7 +154,7 @@ function ComponentView({ components }) {
         </div>
 
         <Tabs.Content value="preview" className="rounded-lg overflow-hidden">
-          <PreviewRenderer code={componentCode} />
+          <PreviewRenderer code={reactNativeCode} />
         </Tabs.Content>
 
         <Tabs.Content value="code" className="rounded-lg">
