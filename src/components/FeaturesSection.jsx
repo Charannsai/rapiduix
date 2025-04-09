@@ -122,7 +122,7 @@ const FeaturesSection = () => {
 
   return (
     <section ref={sectionRef} className="py-32 relative">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background/90 -z-10" />
+      <div className="absolute inset-0 -z-10" />
       
       {/* Animated background elements */}
       <div className="absolute inset-0 overflow-hidden -z-10">
@@ -179,13 +179,25 @@ const FeaturesSection = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {features.map((feature, index) => (
-            <FeatureCard
-              key={index}
-              icon={feature.icon}
-              title={feature.title}
-              description={feature.description}
-              index={index}
-            />
+            <motion.div
+            key={index}
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.1 * index }}
+            className="relative bg-background/30 backdrop-blur-sm border border-white/10 rounded-xl p-6 group hover:border-cyan-500/30 transition-colors"
+          >
+            <div className="w-12 h-12 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg flex items-center justify-center text-cyan-400 mb-4 group-hover:from-cyan-500/30 group-hover:to-blue-500/30 transition-colors">
+              {feature.icon}
+            </div>
+            
+            <h3 className="text-xl font-semibold mb-2 group-hover:text-cyan-400 transition-colors">
+              {feature.title}
+            </h3>
+            
+            <p className="text-muted-foreground">
+              {feature.description}
+            </p>
+          </motion.div>
           ))}
         </div>
       </div>

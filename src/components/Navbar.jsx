@@ -29,7 +29,7 @@ function Navbar() {
     { name: 'Components', path: '/components' },
     { name: 'Templates', path: '/templates' },
     { name: 'Blog', path: '/blog' },
-    { name: 'Docs', path: '/docs' },
+    { name: 'Docs', path: 'https://docs.rapiduix.tech', external: true },
   ];
 
   return (
@@ -81,24 +81,36 @@ function Navbar() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3, delay: index * 0.1 }}
                 >
-                  
-                  <Link 
-                    to={link.path} 
-                    className={`relative text-sm font-medium transition-colors ${
-                      location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)
-                        ? 'text-cyan-400'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    {link.name}
-                    {(location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)) && (
-                      <motion.span
-                        layoutId="navbar-indicator"
-                        className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500"
-                        transition={{ type: "spring", duration: 0.5 }}
-                      />
-                    )}
-                  </Link>
+                                
+                                {link.external ? (
+                <a
+                  href={link.path}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="relative text-sm font-medium transition-colors text-muted-foreground hover:text-foreground"
+                >
+                  {link.name}
+                </a>
+              ) : (
+                <Link 
+                  to={link.path} 
+                  className={`relative text-sm font-medium transition-colors ${
+                    location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)
+                      ? 'text-cyan-400'
+                      : 'text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {link.name}
+                  {(location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)) && (
+                    <motion.span
+                      layoutId="navbar-indicator"
+                      className="absolute -bottom-1 left-0 right-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500"
+                      transition={{ type: "spring", duration: 0.5 }}
+                    />
+                  )}
+                </Link>
+              )}
+
                 </motion.div>
               ))}
 

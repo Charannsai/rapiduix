@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import * as Tabs from '@radix-ui/react-tabs';
 import * as Select from '@radix-ui/react-select';
-import { FiCopy, FiCheck, FiChevronDown } from 'react-icons/fi';
+import { FiCopy, FiCheck, FiChevronDown, FiMaximize, FiMinimize } from 'react-icons/fi';
 import { CopyToClipboard } from 'react-copy-to-clipboard';
 import { fetchComponentCode, fetchComponentDocs } from '../utils/github';
 import PreviewRenderer from './PreviewRenderer';
@@ -24,6 +24,7 @@ function ComponentView({ components }) {
   const [reactNativeCode, setReactNativeCode] = useState('');
   const [componentDocs, setComponentDocs] = useState('');
   const [codeLoading, setCodeLoading] = useState(false);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   useEffect(() => {
     const loadComponent = async () => {
@@ -34,7 +35,6 @@ function ComponentView({ components }) {
         );
         
         if (component) {
-          // Always fetch React Native code for preview
           const [rnCode, docs] = await Promise.all([
             fetchComponentCode(component.name, 'react-native'),
             fetchComponentDocs(component.name, selectedFramework)
@@ -158,7 +158,7 @@ function ComponentView({ components }) {
         </Tabs.Content>
 
         <Tabs.Content value="code" className="rounded-lg">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-end mb-4 space-x-4">
             <Select.Root value={selectedFramework} onValueChange={handleFrameworkChange}>
               <Select.Trigger className="inline-flex items-center justify-between px-4 py-2 text-sm font-medium bg-background/50 border border-border rounded-lg hover:bg-background/80 transition-colors">
                 <Select.Value />
@@ -183,39 +183,77 @@ function ComponentView({ components }) {
           </div>
 
           <div className="relative">
-            <CopyToClipboard text={componentCode} onCopy={handleCopy}>
-              <button className="absolute top-4 right-4 p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors">
-                {copied ? (
-                  <FiCheck className="w-5 h-5" />
-                ) : (
-                  <FiCopy className="w-5 h-5" />
-                )}
-              </button>
-            </CopyToClipboard>
-            {codeLoading ? (
-              <div className="flex items-center justify-center h-[400px]">
-                <motion.div 
-                  className="relative w-8 h-8"
-                  animate={{ rotate: 360 }}
-                  transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+            <AnimatePresence>
+              {!isExpanded && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10"
                 >
-                  <div className="absolute inset-0 rounded-full border-2 border-cyan-500/20 border-t-cyan-500" />
+                  <button
+                    onClick={() => setIsExpanded(true)}
+                    className="px-6 py-3 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors flex items-center gap-2"
+                  >
+                    <FiMaximize className="w-5 h-5" />
+                    Expand Code
+                  </button>
                 </motion.div>
+              )}
+            </AnimatePresence>
+
+            <motion.div
+              animate={{
+                height: isExpanded ? 'auto' : '400px',
+              }}
+              transition={{ duration: 0.3 }}
+              className={`relative ${isExpanded ? '' : 'overflow-hidden'}`}
+            >
+              <div className="absolute top-4 right-4 flex space-x-2 z-20">
+                {isExpanded && (
+                  <button
+                    onClick={() => setIsExpanded(false)}
+                    className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors"
+                  >
+                    <FiMinimize className="w-5 h-5" />
+                  </button>
+                )}
+                <CopyToClipboard text={componentCode} onCopy={handleCopy}>
+                  <button className="p-2 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors">
+                    {copied ? (
+                      <FiCheck className="w-5 h-5" />
+                    ) : (
+                      <FiCopy className="w-5 h-5" />
+                    )}
+                  </button>
+                </CopyToClipboard>
               </div>
-            ) : (
-              <pre className="p-4 bg-[#1a1a1a] rounded-lg overflow-auto">
-                <code
-                  className={`language-${selectedFramework === 'flutter' ? 'dart' : 'jsx'}`}
-                  dangerouslySetInnerHTML={{
-                    __html: Prism.highlight(
-                      componentCode,
-                      selectedFramework === 'flutter' ? Prism.languages.dart : Prism.languages.jsx,
-                      selectedFramework === 'flutter' ? 'dart' : 'jsx'
-                    ),
-                  }}
-                />
-              </pre>
-            )}
+
+              {codeLoading ? (
+                <div className="flex items-center justify-center h-[400px]">
+                  <motion.div 
+                    className="relative w-8 h-8"
+                    animate={{ rotate: 360 }}
+                    transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                  >
+                    <div className="absolute inset-0 rounded-full border-2 border-cyan-500/20 border-t-cyan-500" />
+                  </motion.div>
+                </div>
+              ) : (
+                <pre className={`p-4 bg-[#1a1a1a] rounded-lg ${isExpanded ? 'max-h-[800px] overflow-y-auto' : ''}`}>
+                  <code
+                    className={`language-${selectedFramework === 'flutter' ? 'dart' : 'jsx'}`}
+                    dangerouslySetInnerHTML={{
+                      __html: Prism.highlight(
+                        componentCode,
+                        selectedFramework === 'flutter' ? Prism.languages.dart : Prism.languages.jsx,
+                        selectedFramework === 'flutter' ? 'dart' : 'jsx'
+                      ),
+                    }}
+                  />
+                </pre>
+              )}
+            </motion.div>
           </div>
         </Tabs.Content>
       </Tabs.Root>
