@@ -47,13 +47,13 @@ function PreviewRenderer({ code }) {
                 allowFullScreen
                 sandbox="allow-scripts allow-same-origin allow-modals allow-forms"
                  style={{
-                    clipPath: 'inset(21% 0 6% 80.5%)', 
+                    clipPath: 'inset(17% 0 6% 80.5%)', 
                     position: 'absolute',
-                    top: -150,
+                    top: -100,
                     left: '-220%', 
                     right:'100%',
                     width: '300%', 
-                    height: '150%',
+                    height: '125%',
                     transformOrigin: 'center right'
                   }}
               />
