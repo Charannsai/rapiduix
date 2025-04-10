@@ -49,11 +49,11 @@ function PreviewRenderer({ code }) {
                  style={{
                     clipPath: 'inset(21% 0 6% 80.5%)', 
                     position: 'absolute',
-                    top: -80,
+                    top: -150,
                     left: '-220%', 
                     right:'100%',
                     width: '300%', 
-                    height: '100%',
+                    height: '150%',
                     transformOrigin: 'center right'
                   }}
               />
