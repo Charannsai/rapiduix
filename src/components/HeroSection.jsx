@@ -66,7 +66,7 @@ const HeroSection = () => {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
               </span>
-              Now in beta • v0.1.0
+              Now in beta • v1.1.0.8
             </div>
           </motion.div>
 
