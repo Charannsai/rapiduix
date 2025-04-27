@@ -1,11 +1,12 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { FiArrowRight } from 'react-icons/fi';
-import gsap from 'gsap';
+import { FiArrowRight, FiCopy, FiCheck } from 'react-icons/fi';
+import Lenis from '@studio-freight/lenis';
 
 const HeroSection = () => {
   const containerRef = useRef(null);
+  const [copied, setCopied] = useState(false);
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ["start start", "end start"]
@@ -13,61 +14,35 @@ const HeroSection = () => {
   
   const y = useTransform(scrollYProgress, [0, 1], [0, 300]);
   const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
-  
+
   useEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        '.hero-title span',
-        { y: 100, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          stagger: 0.1,
-          duration: 1,
-          ease: 'power3.out',
-          delay: 0.2
-        }
-      );
-      
-      gsap.fromTo(
-        '.hero-subtitle',
-        { y: 50, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: 1,
-          ease: 'power3.out',
-          delay: 1
-        }
-      );
-      
-      gsap.fromTo(
-        '.hero-cta',
-        { y: 50, opacity: 0 },
-        { 
-          y: 0, 
-          opacity: 1, 
-          duration: 1,
-          ease: 'power3.out',
-          delay: 1.2
-        }
-      );
-      
-      gsap.fromTo(
-        '.hero-visual',
-        { scale: 0.8, opacity: 0 },
-        { 
-          scale: 1, 
-          opacity: 1, 
-          duration: 1.5,
-          ease: 'power3.out',
-          delay: 0.5
-        }
-      );
-    }, containerRef);
-    
-    return () => ctx.revert();
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smooth: true,
+      smoothTouch: false,
+      touchMultiplier: 2,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
   }, []);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText('npm install rapiduix');
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <motion.div 
@@ -80,29 +55,75 @@ const HeroSection = () => {
           style={{ y }}
           className="lg:w-1/2 text-center lg:text-left mb-12 lg:mb-0 z-10"
         >
-      <h1 className="hero-title text-3xl md:text-5xl font-extrabold mb-6 leading-tight">
-  <span className="inline-block bg-clip-text text-transparent bg-white">
-    BUILD
-  </span>{' '}
-  <span className="inline-block bg-clip-text text-transparent bg-white">
-    WITHOUT LIMITS,
-  </span><br />
-  <span className="inline-block bg-clip-text text-transparent bg-white">
-    DESIGN
-  </span>{' '}
-  <span className="inline-block bg-clip-text text-transparent bg-white">
-    WITH PRECISION
-  </span>
-</h1>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="mb-8"
+          >
+            <div className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary text-sm mb-4">
+              <span className="relative flex h-2 w-2 mr-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+              </span>
+              Now in beta • v0.1.0
+            </div>
+          </motion.div>
 
-          <p className="hero-subtitle text-xl md:text-2xl text-muted-foreground text-emerald-500 max-w-xl mx-auto lg:mx-0 mb-8">
-            Premium React Native & Flutter UI Templates for building beautiful cross-platform apps
-          </p>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+            <motion.span 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="block bg-clip-text text-transparent bg-gradient-to-r from-primary via-blue-500 to-purple-600"
+            >
+              Build Native Apps
+            </motion.span>
+            <motion.span
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="block text-white"
+            >
+              Faster Than Ever
+            </motion.span>
+          </h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+            className="text-xl text-muted-foreground mb-8 max-w-xl"
+          >
+            Premium React Native & Flutter UI Components for building beautiful cross-platform apps in minutes, not hours.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="mb-8"
+          >
+            <div className="inline-flex items-center space-x-2 bg-background/30 backdrop-blur-sm border border-white/10 rounded-lg p-2">
+              <code className="text-sm font-mono bg-white/5 px-3 py-2 rounded">npm install rapiduix</code>
+              <button
+                onClick={handleCopy}
+                className="p-2 hover:bg-white/5 rounded-md transition-colors"
+              >
+                {copied ? <FiCheck className="text-green-500" /> : <FiCopy />}
+              </button>
+            </div>
+          </motion.div>
           
-          <div className="hero-cta flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="flex flex-col sm:flex-row items-center lg:justify-start gap-4"
+          >
             <Link
               to="/components"
-              className="group relative px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-500 text-white rounded-lg font-medium inline-flex items-center gap-2 overflow-hidden"
+              className="group relative px-8 py-3 bg-gradient-to-r from-primary to-blue-600 text-white rounded-lg font-medium inline-flex items-center gap-2 overflow-hidden w-full sm:w-auto justify-center"
             >
               <span className="relative z-10">Explore Components</span>
               <FiArrowRight className="relative z-10 group-hover:translate-x-1 transition-transform" />
@@ -114,33 +135,39 @@ const HeroSection = () => {
               />
             </Link>
             
-           <Link
-  to="/templates"
-  className="group relative px-8 py-3 bg-transparent border border-cyan-500/30 text-cyan-400 rounded-lg font-medium inline-flex items-center gap-2 overflow-hidden hover:text-white transition-colors duration-300"
->
-  <span className="relative z-10">View Templates</span>
-  <FiArrowRight className="relative z-10 group-hover:translate-x-1 transition-transform duration-300" />
-
-  <motion.div
-    className="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-500 translate-x-[-100%] group-hover:translate-x-0 transition-transform duration-300 ease-in-out"
-  />
-</Link>
-
-          </div>
+            <Link
+              to="/templates"
+              className="group relative px-8 py-3 bg-transparent border border-primary/30 text-primary rounded-lg font-medium inline-flex items-center gap-2 overflow-hidden hover:text-white transition-colors w-full sm:w-auto justify-center"
+            >
+              <span className="relative z-10">View Templates</span>
+              <FiArrowRight className="relative z-10 group-hover:translate-x-1 transition-transform" />
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-primary to-blue-600"
+                initial={{ x: "-100%" }}
+                whileHover={{ x: 0 }}
+                transition={{ duration: 0.4 }}
+              />
+            </Link>
+          </motion.div>
         </motion.div>
         
         <motion.div 
-          className="hero-visual lg:w-1/2 hidden relative md:inline z-10"
+          className="lg:w-1/2 relative"
           style={{ y: useTransform(scrollYProgress, [0, 1], [0, 150]) }}
         >
-          <div className="relative">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="relative"
+          >
             {/* 3D UI Components Display */}
-            <div className="hidden relative md:inline w-full max-w-lg mx-auto">
-              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 rounded-xl blur-xl" />
+            <div className="relative w-full max-w-lg mx-auto">
+              <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-primary/20 to-purple-500/20 rounded-xl blur-xl" />
               
               <motion.div
                 className="relative bg-background/30 backdrop-blur-sm border border-white/10 rounded-xl p-6 shadow-xl"
-                whileHover={{ y: -5, boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)" }}
+                whileHover={{ y: -5 }}
                 transition={{ type: "spring", stiffness: 300, damping: 15 }}
               >
                 <div className="flex justify-between items-center mb-6">
@@ -153,51 +180,44 @@ const HeroSection = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  <div className="h-12 bg-gradient-to-r from-cyan-500/20 to-blue-500/20 rounded-lg animate-pulse" />
+                  <motion.div 
+                    className="h-12 bg-gradient-to-r from-primary/20 to-blue-500/20 rounded-lg"
+                    animate={{
+                      opacity: [0.5, 1, 0.5],
+                    }}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  />
                   
                   <div className="grid grid-cols-3 gap-2">
-                    <div className="h-24 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-lg" />
-                    <div className="h-24 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg" />
-                    <div className="h-24 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg" />
+                    <motion.div 
+                      className="h-24 bg-gradient-to-br from-primary/20 to-blue-500/20 rounded-lg"
+                      whileHover={{ scale: 1.02 }}
+                    />
+                    <motion.div 
+                      className="h-24 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-lg"
+                      whileHover={{ scale: 1.02 }}
+                    />
+                    <motion.div 
+                      className="h-24 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-lg"
+                      whileHover={{ scale: 1.02 }}
+                    />
                   </div>
                   
-                  <div className="h-10 w-1/2 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-lg mx-auto" />
-                </div>
-              </motion.div>
-              
-              <motion.div
-                className="absolute -bottom-10 -right-10 w-48 h-48 bg-background/30 backdrop-blur-sm border border-white/10 rounded-xl p-4 shadow-xl"
-                initial={{ rotate: -5 }}
-                animate={{ rotate: 5 }}
-                transition={{ duration: 6, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-              >
-                <div className="h-6 w-2/3 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-md mb-3" />
-                <div className="space-y-2">
-                  <div className="h-4 bg-gradient-to-r from-purple-500/20 to-pink-500/20 rounded-md" />
-                  <div className="h-4 bg-gradient-to-r from-purple-500/15 to-pink-500/15 rounded-md" />
-                  <div className="h-4 bg-gradient-to-r from-purple-500/10 to-pink-500/10 rounded-md" />
-                </div>
-              </motion.div>
-              
-              <motion.div
-                className="absolute -top-5 -left-5 w-36 h-36 bg-background/30 backdrop-blur-sm border border-white/10 rounded-xl p-3 shadow-xl"
-                initial={{ rotate: 5 }}
-                animate={{ rotate: -5 }}
-                transition={{ duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
-              >
-                <div className="h-5 w-2/3 bg-gradient-to-r from-cyan-500/30 to-blue-500/30 rounded-md mb-2" />
-                <div className="grid grid-cols-2 gap-2">
-                  <div className="h-10 bg-gradient-to-br from-cyan-500/20 to-blue-500/20 rounded-md" />
-                  <div className="h-10 bg-gradient-to-br from-blue-500/15 to-cyan-500/15 rounded-md" />
-                  <div className="h-10 bg-gradient-to-br from-cyan-500/10 to-blue-500/10 rounded-md" />
-                  <div className="h-10 bg-gradient-to-br from-blue-500/20 to-cyan-500/20 rounded-md" />
+                  <motion.div 
+                    className="h-10 w-1/2 bg-gradient-to-r from-primary to-blue-600 rounded-lg mx-auto"
+                    whileHover={{ scale: 1.02 }}
+                  />
                 </div>
               </motion.div>
             </div>
             
             {/* Floating elements */}
             <motion.div
-              className="absolute -top-10 -right-10 w-20 h-20 rounded-full border border-cyan-500/30"
+              className="absolute -top-10 -right-10 w-20 h-20 rounded-full border border-primary/30"
               animate={{
                 y: [0, -15, 0],
                 rotate: [0, 180, 360],
@@ -225,7 +245,7 @@ const HeroSection = () => {
             />
             
             <motion.div
-              className="absolute top-1/2 right-0 w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500/30 to-blue-500/30 blur-sm"
+              className="absolute top-1/2 right-0 w-8 h-8 rounded-full bg-gradient-to-r from-primary/30 to-blue-500/30 blur-sm"
               animate={{
                 y: [0, 20, 0],
                 x: [0, 10, 0],
@@ -237,10 +257,9 @@ const HeroSection = () => {
                 ease: "easeInOut"
               }}
             />
-          </div>
+          </motion.div>
         </motion.div>
       </div>
-      
     </motion.div>
   );
 };
